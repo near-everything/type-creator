@@ -1,56 +1,16 @@
+import { Alert, AlertIcon, useDisclosure } from "@chakra-ui/react";
 import { useState } from "react";
-import {
-  Alert,
-  AlertIcon,
-  Box,
-  Button,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  InputRightAddon,
-  Spinner,
-  Stack,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/react";
-import { PreHomeScreenProps } from "../routes/NavigationProps";
 import Container from "../components/Container";
 import Content from "../components/Content";
-import NewRoomModal from "../components/NewRoomModal";
+import CreateForm from "../components/CreateForm";
 import Header from "../components/Header";
-import getRoomData from "../services/getRoomData";
+import { PreHomeScreenProps } from "../routes/NavigationProps";
 
 const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isReady, setIsReady] = useState(true);
   const [showError, setShowError] = useState(false);
   const [roomId, setRoomId] = useState("");
-
-  const joinClickHandler = () => {
-    setIsReady(false);
-    getRoomData({ roomId })
-      .then((roomData) => {
-        setIsReady(true);
-
-        // Show error alert
-        if (roomData.error) {
-          setShowError(true);
-          setTimeout(() => {
-            setShowError(false);
-          }, 3000);
-          return;
-        }
-
-        // Success: Go to Room page
-        navigation.push("Room", {
-          roomId,
-          roomMessages: roomData.messages!,
-        });
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  };
 
   return (
     <Container>
@@ -61,8 +21,10 @@ const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
           Room not found!
         </Alert>
       )}
+
       <Content>
-        {isReady ? (
+        <CreateForm />
+        {/* {isReady ? (
           <>
             <Text
               size="xs"
@@ -102,14 +64,8 @@ const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
               size="xl"
             />
           </Box>
-        )}
+        )} */}
       </Content>
-      <NewRoomModal
-        isOpen={isOpen}
-        onClose={onClose}
-        onCreateClick={() => setIsReady(false)}
-        onComplete={() => setIsReady(true)}
-      />
     </Container>
   );
 };
