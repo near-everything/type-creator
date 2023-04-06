@@ -3,7 +3,6 @@ import { useState } from "react";
 import Container from "../components/Container";
 import Content from "../components/Content";
 import CreateForm from "../components/CreateForm";
-import Header from "../components/Header";
 import { PreHomeScreenProps } from "../routes/NavigationProps";
 
 const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
@@ -14,7 +13,6 @@ const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
 
   return (
     <Container>
-      <Header onOpenCreateRoomModal={onOpen} />
       {showError && (
         <Alert status="error">
           <AlertIcon />
