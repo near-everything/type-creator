@@ -2,7 +2,7 @@ import { Alert, AlertIcon, useDisclosure } from "@chakra-ui/react";
 import { useState } from "react";
 import Container from "../components/Container";
 import Content from "../components/Content";
-import CreateForm from "../components/CreateForm";
+import CreateForm from "../components/FormBuilder";
 import { PreHomeScreenProps } from "../routes/NavigationProps";
 
 const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
@@ -21,7 +21,7 @@ const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
       )}
 
       <Content>
-        <CreateForm />
+        
         {/* {isReady ? (
           <>
             <Text
