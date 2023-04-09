@@ -1,5 +1,19 @@
-# ChatV2 Widget App
+# Type Creator
 
-This is an application running on Near Social using the NEAR blockchain network. This app was built as part of testing the [NEAR Social Bridge](https://github.com/wpdas/near-social-bridge) library.
+This is the front end for Everything.Create.Type widget.
 
-You can access it here: [**ChatV2**](https://near.social/#/wendersonpires.near/widget/ChatV2)
+```json
+"scripts": {
+  "dev": "pnpm start",
+  "start": "react-scripts start",
+  "build": "react-scripts build && cp -rf build dist && rm -rf build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
+```
+
+## Development
+
+* Make changes here
+* Build and deploy or use ngrok
+* Put external url in Everything.Create.Type

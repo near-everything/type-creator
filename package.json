@@ -1,5 +1,5 @@
 {
-  "name": "strike-card",
+  "name": "type-creator",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -25,6 +25,7 @@
     "web-vitals": "^2.1.0"
   },
   "scripts": {
+    "dev": "pnpm start",
     "start": "react-scripts start",
     "build": "react-scripts build && cp -rf build dist && rm -rf build",
     "test": "react-scripts test",
