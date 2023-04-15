@@ -94,6 +94,8 @@ function TypeBuilder(props: TypeBuilderProps) {
     setProperties(updatedProperties);
   };
 
+  const SUCCESSFULLY_CREATED = "successfully created";
+
   const handlePublishType = async () => {
     setIsLoading(true);
     const response = await createType({
@@ -104,7 +106,7 @@ function TypeBuilder(props: TypeBuilderProps) {
       setMessage(response.error);
       onOpen();
     } else {
-      setMessage("successfully created")
+      setMessage(SUCCESSFULLY_CREATED)
       onOpen();
       setProperties([]);
       setTypeName("");
@@ -248,7 +250,7 @@ function TypeBuilder(props: TypeBuilderProps) {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Error</ModalHeader>
+          <ModalHeader>{message === SUCCESSFULLY_CREATED ? "Success" : "Error"}</ModalHeader>
           <ModalBody>
             <p>{message}</p>
           </ModalBody>
