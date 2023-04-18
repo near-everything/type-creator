@@ -17,11 +17,13 @@ import {
   Text,
   IconButton,
   Stack,
+  FormErrorMessage,
 } from "@chakra-ui/react";
 import { AddIcon, CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
-import { request } from "near-social-bridge";
+import { request, useInitialPayload } from "near-social-bridge";
 import createType from "../services/createType";
 import Loading from "./Loading";
+import { InitialPayload } from "../screens/UseExisting";
 
 enum ElementType {
   STRING = "string",
@@ -58,6 +60,7 @@ function TypeBuilder(props: TypeBuilderProps) {
   const [typeNameEditor, setTypeNameEditor] = useState("");
   const [typeName, setTypeName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const initialPayload: InitialPayload = useInitialPayload();
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -100,13 +103,13 @@ function TypeBuilder(props: TypeBuilderProps) {
     setIsLoading(true);
     const response = await createType({
       name: typeName,
-      properties
-    })
+      properties,
+    });
     if (response.error) {
       setMessage(response.error);
       onOpen();
     } else {
-      setMessage(SUCCESSFULLY_CREATED)
+      setMessage(SUCCESSFULLY_CREATED);
       onOpen();
       setProperties([]);
       setTypeName("");
@@ -115,51 +118,58 @@ function TypeBuilder(props: TypeBuilderProps) {
   };
 
   if (isLoading) {
-    return (<Loading />)
+    return <Loading />;
   }
+
+  const isError = initialPayload.types?.includes(typeNameEditor);
 
   return (
     <>
       <Flex flexDirection="column" alignItems="left" mt={2}>
         <Box>
-          <Flex alignItems="center" justifyContent="space-between">
-            {isEditing ? (
-              <Input
-                value={typeNameEditor}
-                onChange={(e) => setTypeNameEditor(e.target.value)}
-                placeholder={"Enter Type Name"}
-              />
-            ) : (
-              <Text fontSize="2xl" fontWeight="bold">
-                {typeName}
-              </Text>
-            )}
-            {isEditing ? (
-              <Stack direction="row" alignItems="center">
-                <IconButton
-                  aria-label="Save"
-                  icon={<CheckIcon />}
-                  onClick={handleSaveClick}
-                  ml={2}
-                  isDisabled={typeNameEditor === ""}
+          <FormControl isInvalid={isError}>
+            <Flex alignItems="center" justifyContent="space-between">
+              {isEditing ? (
+                <Input
+                  value={typeNameEditor}
+                  onChange={(e) => setTypeNameEditor(e.target.value)}
+                  placeholder={"Enter Type Name"}
                 />
+              ) : (
+                <Text fontSize="2xl" fontWeight="bold">
+                  {typeName}
+                </Text>
+              )}
+              {isEditing ? (
+                <Stack direction="row" alignItems="center">
+                  <IconButton
+                    aria-label="Save"
+                    icon={<CheckIcon />}
+                    onClick={handleSaveClick}
+                    ml={2}
+                    isDisabled={typeNameEditor === "" || isError}
+                  />
+                  <IconButton
+                    aria-label="Cancel"
+                    icon={<CloseIcon />}
+                    onClick={handleCancelClick}
+                    ml={2}
+                    isDisabled={typeName === ""}
+                  />
+                </Stack>
+              ) : (
                 <IconButton
-                  aria-label="Cancel"
-                  icon={<CloseIcon />}
-                  onClick={handleCancelClick}
+                  aria-label="Edit"
+                  icon={<EditIcon />}
+                  onClick={handleEditClick}
                   ml={2}
-                  isDisabled={typeName === ""}
                 />
-              </Stack>
-            ) : (
-              <IconButton
-                aria-label="Edit"
-                icon={<EditIcon />}
-                onClick={handleEditClick}
-                ml={2}
-              />
-            )}
-          </Flex>
+              )}
+            </Flex>
+            {isError ? (
+              <FormErrorMessage>Type already exists</FormErrorMessage>
+            ) : null}
+          </FormControl>
           {typeName !== "" ? (
             <Box borderWidth="1px" p={4} borderRadius="md" mt={4}>
               <Text fontSize="xl" mb={4} fontWeight="bold">
@@ -250,7 +260,9 @@ function TypeBuilder(props: TypeBuilderProps) {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{message === SUCCESSFULLY_CREATED ? "Success" : "Error"}</ModalHeader>
+          <ModalHeader>
+            {message === SUCCESSFULLY_CREATED ? "Success" : "Error"}
+          </ModalHeader>
           <ModalBody>
             <p>{message}</p>
           </ModalBody>
