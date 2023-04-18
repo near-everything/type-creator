@@ -1,5 +1,6 @@
 import { request } from "near-social-bridge";
 import { Property } from "../components/FormBuilder";
+import { Widgets } from "../screens/View";
 
 interface CreateTypeResponse {
   error?: string;
@@ -8,7 +9,8 @@ interface CreateTypeResponse {
 
 interface CreateTypePayload {
   name: string,
-  properties: Property[]
+  properties: Property[],
+  widgets: Widgets
 }
 
 const createType = (payload: CreateTypePayload) => {

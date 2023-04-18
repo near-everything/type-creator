@@ -24,6 +24,7 @@ import { request, useInitialPayload } from "near-social-bridge";
 import createType from "../services/createType";
 import Loading from "./Loading";
 import { InitialPayload } from "../screens/UseExisting";
+import { Type } from "../services/getTypes";
 
 enum ElementType {
   STRING = "string",
@@ -48,7 +49,10 @@ const colors = {
   // advanced: "pink.200",
 };
 
-interface TypeBuilderProps {}
+interface TypeBuilderProps {
+  isEditActive?: boolean;
+  type?: Type;
+}
 
 function TypeBuilder(props: TypeBuilderProps) {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -56,8 +60,8 @@ function TypeBuilder(props: TypeBuilderProps) {
   const [message, setMessage] = useState<string>("");
   const [name, setName] = useState("");
   const [type, setType] = useState<ElementType>(ElementType.STRING);
-  const [isEditing, setIsEditing] = useState(true);
-  const [typeNameEditor, setTypeNameEditor] = useState("");
+  const [isEditing, setIsEditing] = useState(props.isEditActive ?? false);
+  const [typeNameEditor, setTypeNameEditor] = useState(props.type?.name ?? "");
   const [typeName, setTypeName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const initialPayload: InitialPayload = useInitialPayload();
@@ -97,24 +101,19 @@ function TypeBuilder(props: TypeBuilderProps) {
     setProperties(updatedProperties);
   };
 
-  const SUCCESSFULLY_CREATED = "successfully created";
 
   const handlePublishType = async () => {
-    setIsLoading(true);
-    const response = await createType({
-      name: typeName,
-      properties,
-    });
-    if (response.error) {
-      setMessage(response.error);
-      onOpen();
-    } else {
-      setMessage(SUCCESSFULLY_CREATED);
-      onOpen();
-      setProperties([]);
-      setTypeName("");
-    }
-    setIsLoading(false);
+    // setIsLoading(true);
+    // const response = await createType({
+    //   name: typeName,
+    //   properties,
+    // });
+    // if (response.error) {
+    // } else {
+    //   setProperties([]);
+    //   setTypeName("");
+    // }
+    // setIsLoading(false);
   };
 
   if (isLoading) {
@@ -257,22 +256,6 @@ function TypeBuilder(props: TypeBuilderProps) {
           ) : null}
         </Box>
       </Flex>
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {message === SUCCESSFULLY_CREATED ? "Success" : "Error"}
-          </ModalHeader>
-          <ModalBody>
-            <p>{message}</p>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </>
   );
 }

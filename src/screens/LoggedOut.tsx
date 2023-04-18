@@ -1,6 +1,6 @@
 import { Text } from "@chakra-ui/react";
 import { LoggedOutScreenProps } from "../routes/NavigationProps";
-import Container from "../components/Container";
+import Container from "../components/ModalProvider";
 import Content from "../components/Content";
 import { ChatIcon } from "@chakra-ui/icons";
 
