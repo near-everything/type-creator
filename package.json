@@ -16,7 +16,7 @@
     "@types/react-dom": "^18.0.0",
     "formik": "^2.2.9",
     "framer-motion": "^10.6.1",
-    "near-social-bridge": "^1.0.0-beta5",
+    "near-social-bridge": "^1.3.5",
     "react": "^18.2.0",
     "react-datepicker": "^4.11.0",
     "react-dom": "^18.2.0",

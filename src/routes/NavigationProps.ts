@@ -1,9 +1,13 @@
 import { IFrameStackScreenProps } from "near-social-bridge/navigation";
+import { Type } from "../services/getTypes";
 
 // Navigation props
 export type NavigationProps = {
   Home: undefined;
-  LoggedOut: undefined;
+  List: undefined;
+  View: {
+    type: Type;
+  };
 };
 
 // Screen props
@@ -12,7 +16,12 @@ export type PreHomeScreenProps = IFrameStackScreenProps<
   "Home"
 >;
 
-export type LoggedOutScreenProps = IFrameStackScreenProps<
+export type PreListScreenProps = IFrameStackScreenProps<
   NavigationProps,
-  "LoggedOut"
+  "List"
+>;
+
+export type PreViewScreenProps = IFrameStackScreenProps<
+  NavigationProps,
+  "View"
 >;
