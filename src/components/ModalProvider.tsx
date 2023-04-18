@@ -12,7 +12,7 @@ import React, { useState } from "react";
 
 type ModalMessage = {
   header?: string;
-  body?: string;
+  body?: JSX.Element[];
 };
 
 type ModalContextType = {
@@ -49,7 +49,7 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
         <ModalContent>
           <ModalHeader>{modalMessage.header ?? "Attention"}</ModalHeader>
           <ModalBody>
-            <Text>{modalMessage.body ?? "Something went wrong..."}</Text>
+            {modalMessage.body ?? <Text>"Something went wrong..."</Text>}
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={onClose}>

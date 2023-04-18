@@ -1,6 +1,6 @@
 import { request } from "near-social-bridge";
-import { Property } from "../components/FormBuilder";
-import { Widgets } from "../screens/View";
+import { Widgets } from "../components/WidgetsList";
+import { Property } from "../screens/View";
 
 interface CreateTypeResponse {
   error?: string;

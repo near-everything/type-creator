@@ -8,7 +8,7 @@ const Container: React.FC<{ children: React.ReactNode; navigation: any, iconRigh
   iconRight
 }) => {
   return (
-    <Box maxWidth={500} margin={"auto"}>
+    <Box maxWidth={500} margin={"auto"} minHeight={800}>
       <VStack spacing={2} align="stretch" padding={4}>
         <HStack>
           <IconButton

@@ -1,20 +1,13 @@
 import { request } from "near-social-bridge";
-import { Property } from "../components/FormBuilder";
-import { Widgets } from "../screens/View";
 
 export interface Type {
   accountId: string;
   name: string;
 }
 
-export interface TypeDetails {
-  properties: Property[];
-  widgets?: Widgets;
-}
-
 interface GetTypeDetailsResponse {
   error?: string;
-  details?: TypeDetails;
+  details?: string;
 }
 
 interface GetTypeDetailsPayload {

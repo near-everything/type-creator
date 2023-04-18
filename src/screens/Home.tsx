@@ -14,7 +14,7 @@ const Home: React.FC<PreHomeScreenProps> = ({ navigation }) => {
           Browse Existing
         </Button>
         <Button
-          onClick={() => navigation.push("View", { type: undefined })}
+          onClick={() => navigation.push("View", { type: { accountId: "nonce", name: "nonce"} })}
           size="lg"
         >
           Create New

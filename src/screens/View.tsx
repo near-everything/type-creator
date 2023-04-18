@@ -1,27 +1,19 @@
-import { AddIcon, CheckIcon, EditIcon, RepeatIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  HStack,
-  IconButton,
-  Input,
-  Select,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { CheckIcon, EditIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Button, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
+import { useAuth } from "near-social-bridge";
 import { useContext, useEffect, useState } from "react";
 import Container from "../components/Container";
 import Loading from "../components/Loading";
 import { ModalContext } from "../components/ModalProvider";
+import Name from "../components/Name";
+import PropertiesList from "../components/PropertiesList";
+import WidgetsList, { Widgets } from "../components/WidgetsList";
 import { PreViewScreenProps } from "../routes/NavigationProps";
 import createType from "../services/createType";
 import getTypeDetails from "../services/getTypeDetails";
 import { Type } from "../services/getTypes";
 
-enum ElementType {
+export enum ElementType {
   STRING = "string",
   NUMBER = "number",
   BOOLEAN = "boolean",
@@ -30,24 +22,9 @@ enum ElementType {
   // ADVANCED = "advanced",
 }
 
-const colors = {
-  string: "blue.200",
-  number: "green.200",
-  boolean: "purple.200",
-  date: "teal.200",
-  markdown: "yellow.200",
-  // advanced: "pink.200",
-};
-
 export interface Property {
   name: string;
   type: ElementType;
-}
-
-export interface Widgets {
-  view?: string;
-  summary?: string;
-  create?: string;
 }
 
 const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
@@ -58,31 +35,36 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const { onOpen, setModalMessage } = useContext(ModalContext);
   const [isChangesMade, setIsChangesMade] = useState(false);
+  const auth = useAuth();
 
   useEffect(() => {
-    if (type !== undefined) {
-      initializeTypeDetails(type);
-    } else {
-      setTypeName("");
-      setProperties([]);
-      setWidgets({});
-    }
+    initializeTypeDetails(type);
   }, [type]);
 
   const initializeTypeDetails = (type: Type) => {
-    getTypeDetails({ type })?.then((resp) => {
-      if (resp.error) {
-        setModalMessage({
-          header: "Error",
-          body: `Type details not found for type: ${type?.name}`,
-        });
-        onOpen();
-      } else {
-        setTypeName(type?.name ?? "");
-        setProperties(resp?.details?.properties ?? []);
-        setWidgets(resp?.details?.widgets ?? {});
-      }
-    });
+    if (type.accountId === "nonce" && type.name === "nonce") {
+      setTypeName("");
+      setProperties([]);
+      setWidgets({});
+    } else {
+      getTypeDetails({ type })?.then((resp) => {
+        if (resp.error) {
+          setModalMessage({
+            header: "Error",
+            body: [<Text>Type details not found for type: {type?.name}</Text>],
+          });
+          onOpen();
+        } else {
+          console.log(JSON.stringify(resp));
+          setTypeName(type?.name ?? "");
+          const details = JSON.parse(resp.details ?? "null");
+          if (details) {
+            setProperties(details.properties ?? []);
+            setWidgets(details.widgets ?? {});
+          }
+        }
+      });
+    }
   };
 
   const handleEditClick = () => {
@@ -92,13 +74,7 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
   const handleResetClick = () => {
     setProperties(null);
     setIsEditing(false);
-    if (type) {
-      initializeTypeDetails(type);
-    } else {
-      setTypeName("");
-      setProperties([]);
-      setWidgets({});
-    }
+    initializeTypeDetails(type);
     setIsChangesMade(false);
   };
 
@@ -108,11 +84,73 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
   };
 
   const handleSubmitType = () => {
-    createType({
-      name: typeName,
-      properties: properties ?? [],
-      widgets: widgets,
-    });
+    const errors: JSX.Element[] = [];
+    if (typeName === "") {
+      errors.push(<Text>Type name is empty</Text>);
+    }
+    if (properties === null || properties.length === 0) {
+      errors.push(<Text>Properties have not been provided</Text>);
+    }
+    // TODO: If name conflicts with existing type
+
+    if (errors.length > 0) {
+      setModalMessage({
+        header: "Error",
+        body: errors,
+      });
+    } else {
+      const message: JSX.Element[] = [];
+      if (type?.accountId !== auth.user?.accountId) {
+        message.push(
+          <VStack>
+            <Text>
+              You are not the original creator of this type. Committing will
+              create a new type under your profile. Would you like to continue?
+            </Text>
+            <HStack>
+              <Button
+                onClick={() =>
+                  createType({
+                    name: typeName,
+                    properties: properties!,
+                    widgets: widgets,
+                  })
+                }
+              >
+                Continue
+              </Button>
+            </HStack>
+          </VStack>
+        );
+      } else {
+        message.push(
+          <VStack>
+            <Text>
+              You are about to publish a new version of this type. Would you
+              like to continue?
+            </Text>
+            <HStack>
+              <Button
+                onClick={() =>
+                  createType({
+                    name: typeName,
+                    properties: properties!,
+                    widgets: widgets,
+                  })
+                }
+              >
+                Continue
+              </Button>
+            </HStack>
+          </VStack>
+        );
+      }
+      setModalMessage({
+        header: "Review",
+        body: message,
+      });
+    }
+    onOpen();
   };
 
   return (
@@ -151,7 +189,7 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
           setTypeName={setTypeName}
         />
         {properties ? (
-          <Properties
+          <PropertiesList
             isEditActive={isEditing}
             properties={properties}
             setProperties={setProperties}
@@ -160,7 +198,7 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
           <Loading />
         )}
         {widgets ? (
-          <Widgets
+          <WidgetsList
             isEditActive={isEditing}
             widgets={widgets}
             setWidgets={setWidgets}
@@ -179,232 +217,3 @@ const View: React.FC<PreViewScreenProps> = ({ navigation, route }) => {
 };
 
 export default View;
-
-interface NameProps {
-  isEditActive: boolean;
-  typeName: string;
-  setTypeName: React.Dispatch<React.SetStateAction<string>>;
-}
-
-const Name = ({
-  isEditActive,
-  typeName,
-  setTypeName,
-}: NameProps): JSX.Element => {
-  return (
-    <>
-      <HStack>
-        <Text fontSize="2xl">Name:</Text>
-        {isEditActive ? (
-          <>
-            <Input
-              value={typeName}
-              onChange={(e) => setTypeName(e.target.value)}
-              placeholder={"Enter Type Name"}
-            />
-          </>
-        ) : (
-          <Text fontSize="2xl" fontWeight="bold">
-            {typeName}
-          </Text>
-        )}
-      </HStack>
-    </>
-  );
-};
-
-interface PropertiesProps {
-  isEditActive: boolean;
-  properties: Property[];
-  setProperties: React.Dispatch<React.SetStateAction<Property[] | null>>;
-}
-
-const Properties = ({
-  isEditActive,
-  properties,
-  setProperties,
-}: PropertiesProps): JSX.Element => {
-  function handlePropertyCreate(property: Property) {
-    if (properties.some((p) => p.name === property.name.trim())) {
-      // DO SOMETHING
-    } else {
-      setProperties([...properties, property]);
-    }
-  }
-
-  const handleDelete = (name: string) => {
-    const updatedProperties = properties.filter(
-      (property) => property.name !== name
-    );
-    setProperties(updatedProperties);
-  };
-
-  return (
-    <>
-      <Text fontSize="2xl">Properties:</Text>
-      {isEditActive && (
-        <PropertyCreator handlePropertyCreate={handlePropertyCreate} />
-      )}
-      {properties?.map((property: Property, index: number) => (
-        <Box
-          key={index}
-          backgroundColor={colors[property.type]}
-          borderRadius={5}
-          px={4}
-          py={2}
-          mt={2}
-          maxWidth="100%"
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box mr={4}>
-            <FormLabel display="inline-block" mb={0}>
-              {property.name}
-            </FormLabel>
-            <Box
-              bg="gray.100"
-              borderRadius="md"
-              px={2}
-              py={1}
-              ml={2}
-              display="inline-block"
-            >
-              {property.type}
-            </Box>
-          </Box>
-          {isEditActive ? (
-            <Button
-              variant="outline"
-              size="sm"
-              colorScheme="red"
-              ml={2}
-              onClick={() => handleDelete(property.name)}
-            >
-              Remove
-            </Button>
-          ) : null}
-        </Box>
-      ))}
-    </>
-  );
-};
-
-interface PropertyCreatorProps {
-  handlePropertyCreate: (property: Property) => void;
-}
-
-const PropertyCreator = ({
-  handlePropertyCreate,
-}: PropertyCreatorProps): JSX.Element => {
-  const [name, setName] = useState<string>("");
-  const [type, setType] = useState<ElementType>(ElementType.STRING);
-
-  function handleCreateClick() {
-    handlePropertyCreate({ name, type });
-    setType(ElementType.STRING);
-    setName("");
-  }
-
-  return (
-    <>
-      <Box borderWidth="1px" p={4} borderRadius="md" mt={4}>
-        <Text fontSize="xl" mb={4} fontWeight="bold">
-          Create Property
-        </Text>
-        <Flex alignItems="flex-end" mr={2} gap={2}>
-          <FormControl id="name" isRequired>
-            <FormLabel>Name</FormLabel>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-          </FormControl>
-          <FormControl id="type" isRequired>
-            <FormLabel>Type</FormLabel>
-            <Select
-              value={type}
-              onChange={(e) => setType(e.target.value as ElementType)}
-            >
-              <option value={ElementType.STRING}>String</option>
-              <option value={ElementType.NUMBER}>Number</option>
-              <option value={ElementType.BOOLEAN}>Boolean</option>
-              <option value={ElementType.DATE}>Date</option>
-              <option value={ElementType.MARKDOWN}>Markdown</option>
-              {/* <option value={ElementType.ADVANCED}>Advanced</option> */}
-            </Select>
-          </FormControl>
-          <IconButton
-            aria-label="Add Property"
-            icon={<AddIcon />}
-            onClick={handleCreateClick}
-            isDisabled={name === ""}
-          />
-        </Flex>
-      </Box>
-    </>
-  );
-};
-
-export interface Widgets {
-  view?: string;
-  summary?: string;
-  create?: string;
-}
-
-interface WidgetsProps {
-  isEditActive: boolean;
-  widgets: Widgets;
-  setWidgets: React.Dispatch<React.SetStateAction<Widgets>>;
-}
-
-const Widgets = ({
-  isEditActive,
-  widgets,
-  setWidgets,
-}: WidgetsProps): JSX.Element => {
-  return (
-    <>
-      <Text fontSize="2xl">Widgets:</Text>
-      <VStack align="left">
-        <HStack>
-          <Text fontWeight={"bold"}>View:</Text>
-          {isEditActive ? (
-            <Input
-              value={widgets.view}
-              onChange={(e) => setWidgets({ ...widgets, view: e.target.value })}
-              placeholder={"Enter View Widget"}
-            />
-          ) : (
-            <Text>{widgets.view}</Text>
-          )}
-        </HStack>
-        <HStack>
-          <Text fontWeight={"bold"}>Summary:</Text>
-          {isEditActive ? (
-            <Input
-              value={widgets.summary}
-              onChange={(e) =>
-                setWidgets({ ...widgets, summary: e.target.value })
-              }
-              placeholder={"Enter Summary Widget"}
-            />
-          ) : (
-            <Text> {widgets.summary}</Text>
-          )}
-        </HStack>
-        <HStack>
-          <Text fontWeight={"bold"}>Create:</Text>
-          {isEditActive ? (
-            <Input
-              value={widgets.create}
-              onChange={(e) =>
-                setWidgets({ ...widgets, create: e.target.value })
-              }
-              placeholder={"Enter Create Widget"}
-            />
-          ) : (
-            <Text>{widgets.create}</Text>
-          )}
-        </HStack>
-      </VStack>
-    </>
-  );
-};

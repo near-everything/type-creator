@@ -4,29 +4,16 @@ import { Type } from "../services/getTypes";
 // Navigation props
 export type NavigationProps = {
   Home: undefined;
-  CreateNew: undefined;
-  UseExisting: undefined;
   List: undefined;
   View: {
-    type?: Type;
+    type: Type;
   };
-  LoggedOut: undefined;
 };
 
 // Screen props
 export type PreHomeScreenProps = IFrameStackScreenProps<
   NavigationProps,
   "Home"
->;
-
-export type PreCreateNewScreenProps = IFrameStackScreenProps<
-  NavigationProps,
-  "CreateNew"
->;
-
-export type PreUseExistingScreenProps = IFrameStackScreenProps<
-  NavigationProps,
-  "UseExisting"
 >;
 
 export type PreListScreenProps = IFrameStackScreenProps<
@@ -37,9 +24,4 @@ export type PreListScreenProps = IFrameStackScreenProps<
 export type PreViewScreenProps = IFrameStackScreenProps<
   NavigationProps,
   "View"
->;
-
-export type LoggedOutScreenProps = IFrameStackScreenProps<
-  NavigationProps,
-  "LoggedOut"
 >;

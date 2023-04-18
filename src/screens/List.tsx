@@ -6,6 +6,7 @@ import {
   HStack,
   IconButton,
   Input,
+  Text,
 } from "@chakra-ui/react";
 import { useContext, useState } from "react";
 import Container from "../components/Container";
@@ -26,7 +27,7 @@ const List: React.FC<PreListScreenProps> = ({ navigation }) => {
     getTypes({ accountId: accountId === "" ? null : accountId }).then(
       (response) => {
         if (response.error) {
-          setModalMessage({ header: "Error", body: response.error });
+          setModalMessage({ header: "Error", body: [<Text>response.error</Text>] });
           onOpen();
         } else {
           setTypes(response.types || []);
@@ -68,9 +69,9 @@ const List: React.FC<PreListScreenProps> = ({ navigation }) => {
         ) : (
           <>
             {types.length > 0 ? (
-              types?.map((type: Type) => (
+              types?.map((type: Type, index) => (
                 <ListElement
-                  key={type.name}
+                  key={index}
                   type={type}
                   onView={() => {
                     navigation.push("View", { type });
