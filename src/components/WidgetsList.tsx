@@ -1,9 +1,7 @@
-import {
-  HStack, Input, Text,
-  VStack
-} from "@chakra-ui/react";
+import { HStack, Input, Text, VStack } from "@chakra-ui/react";
 
 export interface Widgets {
+  viewAll?: string;
   view?: string;
   summary?: string;
   create?: string;
@@ -24,6 +22,20 @@ const WidgetsList = ({
     <>
       <Text fontSize="2xl">Widgets:</Text>
       <VStack align="left">
+        <HStack>
+          <Text fontWeight={"bold"}>ViewAll:</Text>
+          {isEditActive ? (
+            <Input
+              value={widgets.viewAll}
+              onChange={(e) =>
+                setWidgets({ ...widgets, viewAll: e.target.value })
+              }
+              placeholder={"Enter ViewAll Widget"}
+            />
+          ) : (
+            <Text>{widgets.viewAll}</Text>
+          )}
+        </HStack>
         <HStack>
           <Text fontWeight={"bold"}>View:</Text>
           {isEditActive ? (
